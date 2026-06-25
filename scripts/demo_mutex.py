@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
 
-from common import get, post, print_status, wait_for_nodes
+from common import get, note, post, print_status, step, title, wait_for_nodes
 
 
 def request_critical_section(node_id: str) -> dict[str, object]:
@@ -17,10 +17,14 @@ def request_critical_section(node_id: str) -> dict[str, object]:
 def main() -> None:
     wait_for_nodes()
 
-    print("== Before concurrent critical-section requests ==")
+    title("CENA 2 - Exclusao mutua com Ricart-Agrawala")
+    note("Objetivo: dois nos pedem a secao critica quase ao mesmo tempo.")
+    note("A prioridade e definida por (timestamp de Lamport, node_id).")
+
+    step("Estado antes dos pedidos concorrentes")
     print_status(["2", "3"])
 
-    print("\n== Nodes 2 and 3 request the critical section at nearly the same time ==")
+    step("Nos 2 e 3 solicitam a secao critica em paralelo")
     with ThreadPoolExecutor(max_workers=2) as executor:
         futures = {
             "2": executor.submit(request_critical_section, "2"),
@@ -28,19 +32,20 @@ def main() -> None:
         }
         for node_id, future in futures.items():
             result = future.result()
-            print(f"node {node_id}: entered={result['entered']}")
+            note(f"node {node_id}: entrou_na_secao_critica={result['entered']}")
 
-    print("\n== After requests ==")
+    step("Estado depois dos pedidos")
     print_status(["2", "3"])
 
-    print("\n== Mutex histories ==")
+    step("Historico do protocolo")
     for node_id in ["2", "3"]:
         status = get(node_id, "/status")
         print(f"\nnode {node_id}")
         for event in status["mutex"]["history"]:
             print(f"  {event['kind']:<14} {event['details']}")
 
+    note("Se os timestamps empatam, o menor node_id tem prioridade. O outro aguarda a resposta adiada.")
+
 
 if __name__ == "__main__":
     main()
-

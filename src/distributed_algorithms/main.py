@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from distributed_algorithms.config import load_settings
 from distributed_algorithms.election import BullyElection
 from distributed_algorithms.lamport import LamportClock
+from distributed_algorithms.logging_config import configure_logging
 from distributed_algorithms.models import (
     CriticalSectionRequest,
     ElectionMessage,
@@ -20,7 +21,8 @@ from distributed_algorithms.mutex import RicartAgrawalaMutex
 from distributed_algorithms.transport import Transport
 
 settings = load_settings()
-clock = LamportClock()
+configure_logging(settings.node_id)
+clock = LamportClock(settings.node_id)
 transport = Transport(settings.other_peers)
 mutex = RicartAgrawalaMutex(settings.node_id, clock, transport)
 election = BullyElection(settings.node_id, transport, list(settings.peers.keys()))
@@ -110,4 +112,3 @@ async def election_internal_election(message: ElectionMessage) -> dict[str, obje
 @app.post("/election/internal/coordinator")
 async def election_internal_coordinator(message: ElectionMessage) -> dict[str, object]:
     return await election.handle_coordinator_message(message.sender_id, message.reason)
-

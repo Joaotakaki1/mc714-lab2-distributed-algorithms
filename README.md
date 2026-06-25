@@ -45,6 +45,18 @@ make reset
 
 ## Demonstracoes
 
+Demo completa, com reset automatico entre os algoritmos:
+
+```bash
+make demo-all
+```
+
+Para gravacao, use a versao com pausa entre as cenas:
+
+```bash
+make demo-all-paused
+```
+
 Relogio de Lamport:
 
 ```bash
@@ -86,7 +98,8 @@ O demo de eleicao para o container `node5`, inicia uma eleicao pelo `node2`, mos
 ## Sugestao de roteiro para o video
 
 1. Mostrar `docker-compose.yml` e explicar que cada container representa um no.
-2. Rodar `make demo-lamport` e explicar incremento no envio e atualizacao no recebimento.
-3. Rodar `make demo-mutex` e explicar como os pedidos concorrentes sao ordenados por `(timestamp, node_id)`.
-4. Rodar `make demo-election` e explicar a falha do lider e a eleicao do maior id ativo.
-5. Mostrar rapidamente os arquivos dos algoritmos e os logs/status dos nos.
+2. Rodar `make demo-all-paused` para conduzir a gravacao em tres cenas.
+3. Na cena de Lamport, explicar incremento no envio e atualizacao no recebimento.
+4. Na cena de exclusao mutua, explicar como os pedidos concorrentes sao ordenados por `(timestamp, node_id)`.
+5. Na cena de eleicao, explicar a falha do lider e a eleicao do maior id ativo.
+6. Mostrar rapidamente os arquivos dos algoritmos e os logs dos nos com `make logs`.

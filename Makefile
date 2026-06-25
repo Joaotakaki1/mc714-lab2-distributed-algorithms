@@ -1,4 +1,4 @@
-.PHONY: build up down reset logs status demo-lamport demo-mutex demo-election
+.PHONY: build up down reset logs status demo-lamport demo-mutex demo-election demo-all demo-all-paused
 
 build:
 	docker compose build
@@ -25,3 +25,9 @@ demo-mutex:
 
 demo-election:
 	python3 scripts/demo_election.py
+
+demo-all:
+	python3 scripts/demo_all.py
+
+demo-all-paused:
+	python3 scripts/demo_all.py --pause

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -67,5 +68,35 @@ def print_status(node_ids: list[str]) -> None:
         )
 
 
+def title(text: str) -> None:
+    print("\n" + "=" * 80)
+    print(text)
+    print("=" * 80)
+
+
+def step(text: str) -> None:
+    print(f"\n-- {text}")
+
+
+def note(text: str) -> None:
+    print(f"   {text}")
+
+
 def compose(*args: str) -> None:
     subprocess.run(["docker", "compose", *args], check=True)
+
+
+def compose_quiet(*args: str) -> None:
+    env = os.environ.copy()
+    env.setdefault("COMPOSE_PROGRESS", "quiet")
+    result = subprocess.run(
+        ["docker", "compose", *args],
+        check=False,
+        env=env,
+        stderr=subprocess.STDOUT,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    if result.returncode != 0:
+        print(result.stdout)
+        raise subprocess.CalledProcessError(result.returncode, result.args, result.stdout)

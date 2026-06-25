@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -22,6 +23,7 @@ class Transport:
     def __init__(self, peers: dict[str, Peer], timeout_seconds: float = 3.0) -> None:
         self._peers = peers
         self._timeout_seconds = timeout_seconds
+        self._logger = logging.getLogger("mc714.transport")
 
     @property
     def peer_ids(self) -> list[str]:
@@ -34,11 +36,12 @@ class Transport:
             async with httpx.AsyncClient(timeout=self._timeout_seconds) as client:
                 response = await client.post(url, json=payload)
             data = response.json() if response.content else {}
+            self._logger.info("HTTP    | POST %-34s -> node %s status=%s", path, peer_id, response.status_code)
             return SendResult(peer_id=peer_id, ok=response.is_success, status_code=response.status_code, data=data)
         except (httpx.HTTPError, ValueError) as exc:
+            self._logger.info("HTTP    | POST %-34s -> node %s failed=%s", path, peer_id, exc)
             return SendResult(peer_id=peer_id, ok=False, error=str(exc))
 
     async def broadcast(self, path: str, payload: dict[str, Any], peer_ids: list[str] | None = None) -> list[SendResult]:
         targets = peer_ids if peer_ids is not None else self.peer_ids
         return await asyncio.gather(*(self.post(peer_id, path, payload) for peer_id in targets))
-
